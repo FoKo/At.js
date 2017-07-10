@@ -236,10 +236,16 @@ App = (function() {
           return c.view.hide(e, c.getOpt("displayTimeout"));
         }
       };
-    })(this)).on('click.atwhoInner', (function(_this) {
-      return function(e) {
-        return _this.dispatch(e);
-      };
+    // TODO: change this to be an option
+    // Remove this click handler so that nothing happens when you click on a token
+    // 
+    // })(this)).on('click.atwhoInner', (function(_this) {
+    //   return function(e) {
+    //     console.log('click2');
+
+    //     //return _this.dispatch(e);
+    //     return true;
+    //   };
     })(this)).on('scroll.atwhoInner', (function(_this) {
       return function() {
         var lastScrollTop;
@@ -710,7 +716,19 @@ EditableController = (function(superClass) {
     if (!range.collapsed) {
       return;
     }
-    if (e.which === KEY_CODE.ENTER) {
+
+    /**
+     * In order to handle backspace issues on ie11, we
+     * decided it was the lesser of 2 evils to simply just
+     * delete the whole token when the backspace hits the token
+     */
+    if (e.which === KEY_CODE.BACKSPACE) {
+      const target = window.getSelection().focusNode.parentNode;
+      if (/atwho-inserted/.test(target.className)) {
+        target.parentNode.removeChild(target);
+      }
+      return;
+    } else if (e.which === KEY_CODE.ENTER) {
       ($query = $(range.startContainer).closest('.atwho-query')).contents().unwrap();
       if ($query.is(':empty')) {
         $query.remove();
@@ -747,13 +765,15 @@ EditableController = (function(superClass) {
     }
     if ($query.length > 0) {
       switch (e.which) {
+        // Remove the special handling for the left and right arrows.
+        // It was causing nothing but problems.
         case KEY_CODE.LEFT:
-          this._setRange('before', $query.get(0), range);
-          $query.removeClass('atwho-query');
+          // this._setRange('before', $query.get(0), range);
+          // $query.removeClass('atwho-query');
           return;
         case KEY_CODE.RIGHT:
-          this._setRange('after', $query.get(0).nextSibling, range);
-          $query.removeClass('atwho-query');
+          // this._setRange('after', $query.get(0).nextSibling, range);
+          // $query.removeClass('atwho-query');
           return;
       }
     }
@@ -832,7 +852,12 @@ EditableController = (function(superClass) {
     }
     suffix = (suffix = this.getOpt('suffix')) === "" ? suffix : suffix || "\u00A0";
     data = $li.data('item-data');
-    this.query.el.removeClass('atwho-query').addClass('atwho-inserted').html(content).attr('data-atwho-at-query', "" + data['atwho-at'] + this.query.text).attr('contenteditable', "false");
+
+    /**
+     * Originally this next line added .attr('contenteditable', "false");  to the node
+     * however, this caused problems when backspacing over tokens in IE11
+     */
+    this.query.el.removeClass('atwho-query').addClass('atwho-inserted').html(content).attr('data-atwho-at-query', "" + data['atwho-at'] + this.query.text);
     if (range = this._getRange()) {
       if (this.query.el.length) {
         range.setEndAfter(this.query.el[0]);
