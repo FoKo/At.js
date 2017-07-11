@@ -41,7 +41,8 @@ class EditableController extends Controller
     # decided it was the lesser of 2 evils to simply just
     # delete the whole token when the backspace hits the token
     if e.which == KEY_CODE.BACKSPACE
-      window.getSelection().focusNode.parentNode.parentNode.removeChild(target) if /atwho-inserted/.test(target.className)
+      target = window.getSelection().focusNode.parentNode
+      target.parentNode.removeChild(target) if /atwho-inserted/.test(target.className)
       return
     else if e.which == KEY_CODE.ENTER
       ($query = $(range.startContainer).closest '.atwho-query')
