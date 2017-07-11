@@ -699,7 +699,7 @@ EditableController = (function(superClass) {
   };
 
   EditableController.prototype.catchQuery = function(e) {
-    var $inserted, $query, _range, index, inserted, isString, lastNode, matched, offset, query, query_content, range;
+    var $inserted, $query, _range, index, inserted, isString, lastNode, matched, offset, query, query_content, range, target;
     if (!(range = this._getRange())) {
       return;
     }
@@ -707,8 +707,9 @@ EditableController = (function(superClass) {
       return;
     }
     if (e.which === KEY_CODE.BACKSPACE) {
+      target = window.getSelection().focusNode.parentNode;
       if (/atwho-inserted/.test(target.className)) {
-        window.getSelection().focusNode.parentNode.parentNode.removeChild(target);
+        target.parentNode.removeChild(target);
       }
       return;
     } else if (e.which === KEY_CODE.ENTER) {
